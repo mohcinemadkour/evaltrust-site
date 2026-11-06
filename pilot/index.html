@@ -187,13 +187,14 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
 <script>
 // ===== SETUP: paste your Formspree (or similar) endpoint between the quotes. Empty = opens the visitor's email app instead.
-const FORM_ENDPOINT = "";
+const FORM_ENDPOINT = "https://formspree.io/f/xdeevnjl";
 const TO = "mohcine@evaltrust.cloud";
 const f=document.getElementById('f'), msg=document.getElementById('msg');
 f.addEventListener('submit', async e=>{
   e.preventDefault(); msg.className='';
   if(!f.checkValidity()){ msg.className='err'; msg.textContent='Please fill in name, work email, company, and tick the agreement box.'; f.reportValidity&&f.reportValidity(); return; }
   const data=Object.fromEntries(new FormData(f));
+  data._subject='New EvalTrust pilot request — '+(data.company||'');
   if(FORM_ENDPOINT){
     msg.textContent='Sending…';
     try{
