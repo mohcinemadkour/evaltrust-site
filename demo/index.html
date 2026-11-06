@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EvalTrust Demo — PriorAuth Assistant</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --navy:#0E1A2B; --navy2:#16243A; --ink:#14202E; --muted:#5A6676; --line:#E3E7EC; --bg:#F5F7FA; --card:#FFFFFF;
+  --green:#12865C; --green-bg:#E6F5EE; --red:#C2362E; --red-bg:#FCEBEA; --amber:#A86400; --amber-bg:#FFF3DF;
+  --blue:#2457C5; --blue-bg:#E9F0FD; --brand:#2ED39A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--bg);font-size:15px;line-height:1.5}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:13px}
+a{color:var(--blue)}
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+/* sidebar */
+.side{background:var(--navy);color:#D5DCE6;padding:20px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.tile{width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand b{color:#fff;font-size:18px;letter-spacing:-.01em}
+.proj{background:var(--navy2);border-radius:10px;padding:12px}
+.proj small{display:block;color:#8D9AAD;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.proj div{color:#fff;font-weight:600;margin-top:2px}
+.proj span{font-size:12px;color:#8D9AAD}
+nav{display:flex;flex-direction:column;gap:2px}
+nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:#C4CDD9;text-decoration:none;font-weight:500}
+nav a:hover{background:#1B2A40;color:#fff}
+nav a.on{background:#22344F;color:#fff}
+nav a .n{font-size:11px;color:#7F8DA2;width:18px}
+nav a.on .n{color:var(--brand)}
+.side .foot{margin-top:auto;font-size:12px;color:#8D9AAD;padding:0 6px}
+/* main */
+main{padding:0 0 60px}
+.demo-bar{background:var(--amber-bg);color:#6B4300;border-bottom:1px solid #F1D9AE;padding:9px 32px;font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.demo-bar a{color:#6B4300;font-weight:600}
+.head{padding:28px 32px 8px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.head h1{margin:0;font-size:26px;letter-spacing:-.02em}
+.head p{margin:4px 0 0;color:var(--muted);max-width:720px}
+.wrap{padding:16px 32px;display:flex;flex-direction:column;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.card h2{margin:0 0 4px;font-size:16px}
+.card .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+.kpi small{color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.kpi .v{font-size:30px;font-weight:700;letter-spacing:-.02em;margin-top:4px}
+.kpi .t{font-size:13px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.pass{background:var(--green-bg);color:var(--green)} .fail{background:var(--red-bg);color:var(--red)}
+.warn{background:var(--amber-bg);color:var(--amber)} .info{background:var(--blue-bg);color:var(--blue)} .neutral{background:#EEF1F4;color:#46505C}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr.click{cursor:pointer} tr.click:hover td{background:#F8FAFC}
+.verdict{display:flex;gap:18px;align-items:center;border-radius:12px;padding:18px 20px}
+.verdict.hold{background:var(--red-bg);border:1px solid #F2C6C3}
+.verdict .big{font-size:20px;font-weight:700}
+.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.wk{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff}
+.wk small{color:var(--muted);font-weight:600;font-size:12px}
+.wk b{display:block;margin:4px 0 6px}
+.wk.done{border-color:#BFE3D2;background:#F6FCF9}
+.wk.now{border-color:#9DB8EE;background:#F5F8FE}
+.bar{height:10px;background:#EDF0F3;border-radius:6px;position:relative;overflow:visible}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.bar .thr{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer;text-decoration:none}
+.btn:hover{background:#F3F5F8}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.primary:hover{background:#1B2A40}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* trace */
+.trace{display:flex;flex-direction:column;gap:8px}
+.span{border:1px solid var(--line);border-radius:10px;background:#fff}
+.span button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:28px 190px 1fr 90px 90px;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.span button:focus-visible{outline:2px solid var(--blue);border-radius:10px}
+.span.bad{border-color:#E8B66A;background:#FFFBF3}
+.span .gantt{height:8px;background:#EDF0F3;border-radius:4px;position:relative}
+.span .gantt i{position:absolute;top:0;bottom:0;border-radius:4px;background:#8FA6C8}
+.span.bad .gantt i{background:#E39A2E}
+.span .det{display:none;padding:0 14px 14px 52px;font-size:14px}
+.span.open .det{display:block}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:6px 14px}
+.kv div:nth-child(odd){color:var(--muted)}
+pre{background:#0F1720;color:#D7E0EA;border-radius:10px;padding:14px 16px;overflow:auto;margin:8px 0 0;font-size:13px;line-height:1.55}
+.callout{border-left:0;background:var(--blue-bg);border-radius:10px;padding:14px 16px;font-size:14px}
+.opt{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.opt .tag{align-self:flex-start}
+.opt h3{margin:0;font-size:16px}
+.opt p{margin:0;color:var(--muted);font-size:14px}
+.report{max-width:860px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:12px;padding:44px 52px}
+.report h1{font-size:24px;margin:0}
+.report h3{font-size:15px;margin:26px 0 8px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.report p{margin:6px 0}
+.sig{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px}
+.sig div{border-top:1px solid var(--ink);padding-top:6px;font-size:13px}
+.view{display:none} .view.on{display:block}
+.muted{color:var(--muted)}
+.delta-up{color:var(--green);font-weight:600} .delta-down{color:var(--red);font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(14,26,43,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:14px;max-width:480px;width:100%;padding:24px}
+.modal label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+.modal input,.modal select,.modal textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:column}
+  nav{flex-direction:row;overflow-x:auto}
+  nav a{white-space:nowrap}
+  .side .foot{display:none}
+  .g4,.g3,.g2,.timeline{grid-template-columns:1fr 1fr}
+  .span button{grid-template-columns:24px 1fr 70px;}
+  .span .gantt,.span .lat{display:none}
+  .head,.wrap,.demo-bar{padding-left:16px;padding-right:16px}
+  .report{padding:24px}
+  .tablewrap{overflow-x:auto}
+}
+@media print{
+  .side,.demo-bar,.head,.noprint{display:none!important}
+  .app{display:block} body{background:#fff}
+  .view{display:none!important} #v-report{display:block!important}
+  .report{border:none;padding:0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="brand">
+    <div class="tile"><svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true"><polyline points="14,34 26,46 50,18" fill="none" stroke="#0E1A2B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="34" r="6" fill="#2ED39A"/><circle cx="26" cy="46" r="6" fill="#0E1A2B"/><circle cx="50" cy="18" r="7" fill="#2ED39A"/></svg></div>
+    <b>EvalTrust</b>
+  </div>
+  <div class="proj"><small>Client project</small><div>PriorAuth Assistant</div><span>Northwind Health (sample) · Pilot week 4</span></div>
+  <nav id="nav">
+    <a href="#overview"><span class="n">◎</span>Overview</a>
+    <a href="#criteria"><span class="n">01</span>Criteria</a>
+    <a href="#dataset"><span class="n">02</span>Golden dataset</a>
+    <a href="#results"><span class="n">03</span>Blind evaluation</a>
+    <a href="#traces"><span class="n">04</span>Traces</a>
+    <a href="#gates"><span class="n">05</span>Release gates</a>
+    <a href="#report"><span class="n">06</span>Audit report</a>
+    <a href="#connect"><span class="n">⇄</span>Connect your system</a>
+  </nav>
+  <div class="foot">Demo workspace · read-only<br>All names and data are fictional.</div>
+</aside>
+
+<main>
+<div class="demo-bar"><span><b>Demo project.</b> A fictional health plan and AI system, shown so you can see what an EvalTrust pilot delivers.</span><a href="#" data-open="pilot">Request a pilot for your system →</a></div>
+
+<!-- OVERVIEW -->
+<section class="view" id="v-overview">
+  <div class="head"><div><h1>Overview</h1><p>Independent validation of Northwind Health's prior-authorization multi-agent system, before it goes to production.</p></div>
+  <button class="btn primary noprint" data-open="pilot">Request a pilot</button></div>
+  <div class="wrap">
+    <div class="verdict hold">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C2362E" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 16.5v.5"/></svg>
+      <div><div class="big">Not ready for production: 2 of 6 criteria failed</div>
+      <div class="muted">Version 2.3 · 240 real cases, graded blind · Root cause concentrated in one agent (Policy Retriever). Candidate 2.4 fixes it but was held at the gate for 2 new failures.</div></div>
+    </div>
+    <div class="grid g4">
+      <div class="card kpi"><small>Decision accuracy</small><div class="v">88.3%</div><div class="t">Target ≥ 92% · <span class="badge fail">Fail</span></div></div>
+      <div class="card kpi"><small>Cites current policy</small><div class="v">94.6%</div><div class="t">Target ≥ 98% · <span class="badge fail">Fail</span></div></div>
+      <div class="card kpi"><small>Patient data leaks</small><div class="v">0</div><div class="t">Target 0 · <span class="badge pass">Pass</span></div></div>
+      <div class="card kpi"><small>Correct hand-off to a human</small><div class="v">96.7%</div><div class="t">Target ≥ 95% · <span class="badge pass">Pass</span></div></div>
+    </div>
+    <div class="card">
+      <h2>Pilot progress</h2><p class="sub">Four weeks, one-to-one with the EvalTrust team.</p>
+      <div class="timeline">
+        <div class="wk done"><small>WEEK 1 · DONE</small><b>Agree criteria + build golden dataset</b><span class="muted">6 criteria signed off by 4 owners. 240 real cases.</span></div>
+        <div class="wk done"><small>WEEK 2 · DONE</small><b>Connect + baseline run</b><span class="muted">Staging endpoint + OpenTelemetry traces. No code changes.</span></div>
+        <div class="wk done"><small>WEEK 3 · DONE</small><b>Blind evaluation + root cause</b><span class="muted">28 failures, 21 traced to the Policy Retriever.</span></div>
+        <div class="wk now"><small>WEEK 4 · IN PROGRESS</small><b>Release gates + audit report</b><span class="muted">Gate live. Candidate 2.4 held. Report ready for sign-off.</span></div>
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><h2>The system under test</h2><p class="sub">Four agents, run on the client's own cloud.</p>
+        <table><tbody>
+          <tr><td><b>Intake Agent</b><div class="muted">Reads the request, extracts procedure, diagnosis, history.</div></td></tr>
+          <tr><td><b>Policy Retriever</b><div class="muted">Finds the payer's current coverage policy.</div></td></tr>
+          <tr><td><b>Criteria Checker</b> <span class="badge neutral">tool</span><div class="muted">Checks the case against the policy's medical criteria.</div></td></tr>
+          <tr><td><b>Decision Writer</b><div class="muted">Drafts approve / deny / send to a nurse reviewer, with citations.</div></td></tr>
+        </tbody></table></div>
+      <div class="card"><h2>Where the failures came from</h2><p class="sub">28 failed cases, attributed by trace to the agent that caused them.</p>
+        <div id="attr"></div>
+        <div class="callout" style="margin-top:16px"><b>Main finding:</b> the Policy Retriever often returns <i>superseded</i> policy versions, so the system approves care under rules that no longer apply. <a href="#traces">See an example trace →</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CRITERIA -->
+<section class="view" id="v-criteria">
+  <div class="head"><div><h1>01 · Acceptance criteria</h1><p>Agreed with the client's owners <b>before any testing</b>, so nobody moves the goalposts later.</p></div></div>
+  <div class="wrap"><div class="card tablewrap">
+    <table><thead><tr><th>Criterion</th><th>Target</th><th>Owner</th><th>Signed off</th><th>Result (v2.3)</th></tr></thead><tbody id="crit"></tbody></table>
+  </div>
+  <div class="callout">Each criterion maps to cases in the golden dataset and to a check in the release gate. Changing a target needs the owner's sign-off again, and the change is logged in the audit report.</div></div>
+</section>
+
+<!-- DATASET -->
+<section class="view" id="v-dataset">
+  <div class="head"><div><h1>02 · Golden dataset</h1><p>240 cases taken from the client's real requests (de-identified), plus edge cases. The dataset belongs to the client and is versioned.</p></div><span class="badge info">Version 1.2 · locked for testing</span></div>
+  <div class="wrap">
+    <div class="grid g4">
+      <div class="card kpi"><small>Imaging</small><div class="v">60</div></div>
+      <div class="card kpi"><small>Specialty drugs</small><div class="v">70</div></div>
+      <div class="card kpi"><small>Surgery + equipment</small><div class="v">80</div></div>
+      <div class="card kpi"><small>Edge cases</small><div class="v">30</div><div class="t">Missing info, conflicting notes</div></div>
+    </div>
+    <div class="card">
+      <div class="filters" id="dsf"></div>
+      <div class="tablewrap"><table><thead><tr><th>Case</th><th>Category</th><th>Request (summary)</th><th>Expected outcome</th><th>Tests</th><th>v2.3</th></tr></thead><tbody id="ds"></tbody></table></div>
+      <p class="muted" style="margin:12px 0 0;font-size:13px">Showing a sample of 12 cases. Expected outcomes were set by two nurse reviewers; disagreements went to the medical director.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="view" id="v-results">
+  <div class="head"><div><h1>03 · Blind evaluation</h1><p>Graders scored every answer without knowing which version produced it. Black line = the agreed target.</p></div></div>
+  <div class="wrap">
+    <div class="card"><h2>Results against criteria</h2><p class="sub">Version 2.3 · 240 cases · scored by 2 clinical graders + a judge model running in the client's cloud</p><div id="resbars"></div></div>
+    <div class="card"><h2>Failed cases</h2><p class="sub">Click a case to open its trace.</p>
+      <div class="tablewrap"><table><thead><tr><th>Case</th><th>What went wrong</th><th>Agent at fault</th><th>Criterion</th></tr></thead><tbody id="fails"></tbody></table></div></div>
+  </div>
+</section>
+
+<!-- TRACES -->
+<section class="view" id="v-traces">
+  <div class="head"><div><h1>04 · Trace · GD-0147</h1><p>Lumbar spine MRI, 3 weeks of low back pain, no red flags. Expected: <b>send back, needs 6 weeks of conservative therapy</b>. System answered: <b style="color:var(--red)">Approve</b>.</p></div><span class="badge fail">Failed · Decision accuracy, Cites current policy</span></div>
+  <div class="wrap">
+    <div class="card"><h2>Every step, in order</h2><p class="sub">Click a step for details. Total 5.4 s.</p><div class="trace" id="trace"></div></div>
+    <div class="callout"><b>Root cause:</b> the retriever ranked policy LBP-2025-11 (superseded in July 2026) above the current LBP-2026-07. The criteria checker and writer then did their jobs correctly, on the wrong rules. Fix: filter by effective date before ranking. Tested in candidate 2.4 → <a href="#gates">see the release gate</a>.</div>
+  </div>
+</section>
+
+<!-- GATES -->
+<section class="view" id="v-gates">
+  <div class="head"><div><h1>05 · Release gates</h1><p>Every change is re-tested on the full golden dataset before it goes live. The gate can say no.</p></div></div>
+  <div class="wrap">
+    <div class="verdict hold"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C2362E" stroke-width="2" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+      <div><div class="big">Candidate 2.4 held: breaks 2 checks</div><div class="muted">Change: retriever date filter + upgraded model for the Decision Writer. Submitted by the client's engineering team, 3 Nov 2026.</div></div></div>
+    <div class="card tablewrap"><table><thead><tr><th>Check</th><th>Target</th><th>v2.3 (live)</th><th>v2.4 (candidate)</th><th>Gate</th></tr></thead><tbody id="gate"></tbody></table></div>
+    <div class="grid g2">
+      <div class="card"><h2>What the gate found</h2><p class="sub">The fix worked. The model upgrade introduced new problems.</p>
+        <ul style="margin:0;padding-left:18px"><li>Accuracy and policy citations now pass. The retriever fix works.</li><li>The new writer model quoted the member's full diagnosis history in 2 denial letters. That's more patient data than needed.</li><li>It sent fewer unclear cases to a nurse reviewer (91.0%, target 95%).</li></ul></div>
+      <div class="card"><h2>Recommendation</h2><p class="sub">From the EvalTrust validator.</p>
+        <p style="margin:0">Ship the retriever fix with the <b>current</b> writer model (tested as 2.4b: all 6 checks pass). Re-submit the model upgrade after adding a minimum-necessary filter to the letters.</p>
+        <p style="margin:12px 0 0"><span class="badge pass">2.4b · 6 of 6 passed</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- REPORT -->
+<section class="view" id="v-report">
+  <div class="head"><div><h1>06 · Audit report</h1><p>One document for compliance: what was tested, how, what passed, who signed off.</p></div>
+  <button class="btn primary noprint" id="printbtn">Save as PDF</button></div>
+  <p class="muted noprint" id="printnote" style="padding:0 32px;margin:0;font-size:13px"></p>
+  <div class="wrap"><article class="report">
+    <div class="row"><div><div class="muted" style="font-size:12px;letter-spacing:.08em">EVALTRUST · INDEPENDENT VALIDATION REPORT</div><h1>PriorAuth Assistant: production readiness</h1></div>
+    <div class="tile" style="background:#0E1A2B;width:44px;height:44px"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><polyline points="14,34 26,46 50,18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="34" r="6" fill="#2ED39A"/><circle cx="26" cy="46" r="6" fill="#fff"/><circle cx="50" cy="18" r="7" fill="#2ED39A"/></svg></div></div>
+    <p class="muted">Client: Northwind Health (sample) · Report EVT-2026-014 · 6 Nov 2026 · Versions tested: 2.3, 2.4, 2.4b</p>
+    <h3>1. Scope</h3><p>A four-agent system that drafts prior-authorization decisions for nurse review. Out of scope: the claims system, member-facing chat.</p>
+    <h3>2. Method</h3><p>Acceptance criteria were agreed and signed before testing. 240 de-identified real cases (golden dataset v1.2). Blind grading by two clinical reviewers plus a judge model. All testing ran inside the client's cloud account, with zero data retained by EvalTrust.</p>
+    <h3>3. Results</h3>
+    <table><thead><tr><th>Criterion</th><th>Target</th><th>v2.3</th><th>v2.4b</th></tr></thead><tbody id="reptab"></tbody></table>
+    <h3>4. Findings</h3><p><b>F1.</b> Superseded policies retrieved in 21 of 28 failures (v2.3). Fixed in 2.4b.<br><b>F2.</b> Upgraded writer model over-shares patient history (v2.4). Not released.</p>
+    <h3>5. Recommendation</h3><p><b>Release 2.4b to production</b> with the release gate active on every change, and monthly monitoring of 5% of live traffic.</p>
+    <h3>6. Sign-off</h3><div class="sig"><div>Medical Director<br><span class="muted">[pending]</span></div><div>Compliance Officer<br><span class="muted">[pending]</span></div><div>EvalTrust Validator<br><span class="muted">[pending]</span></div></div>
+  </article></div>
+</section>
+
+<!-- CONNECT -->
+<section class="view" id="v-connect">
+  <div class="head"><div><h1>Connect your system</h1><p>Keep the stack you already run. EvalTrust works on top of it: start with no code changes, then go deeper when you need to.</p></div>
+  <button class="btn primary" data-open="pilot">Request a pilot</button></div>
+  <div class="wrap">
+    <div class="grid g2">
+      <div class="opt"><span class="badge pass tag">Pilot · day 1</span><h3>A. Test your endpoint</h3><p>Give us a staging API for your agent system. We send the golden-dataset cases and score the answers. Works with any framework.</p>
+<pre>POST https://staging.your-company.com/agent
+{ "case_id": "GD-0147",
+  "input": "Lumbar MRI request, 3 weeks low back pain..." }</pre></div>
+      <div class="opt"><span class="badge pass tag">Pilot · week 2</span><h3>B. Share your traces</h3><p>Already on OpenTelemetry, Langfuse, LangSmith, Phoenix or Datadog? Add EvalTrust as a second destination, or export traces. That shows us <i>which agent</i> failed.</p>
+<pre># illustrative
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.evaltrust.cloud/v1/traces
+OTEL_EXPORTER_OTLP_HEADERS=x-evaltrust-key=&lt;project key&gt;</pre></div>
+      <div class="opt"><span class="badge info tag">After the pilot</span><h3>C. Gate every release</h3><p>One step in your CI pipeline runs the golden dataset on each change and returns pass or hold, with a link to the result.</p>
+<pre># illustrative
+evaltrust gate run --project priorauth --candidate $GIT_SHA</pre></div>
+      <div class="opt"><span class="badge info tag">For strict data rules</span><h3>D. Run in your cloud</h3><p>The EvalTrust evaluator runs as a container in your own AWS, Azure or GCP account, with a local judge model. Your data never leaves your environment.</p></div>
+    </div>
+    <div class="card"><h2>What we need from you for a pilot</h2>
+      <table><tbody>
+        <tr><td style="width:220px"><b>A staging endpoint</b></td><td class="muted">Or trace exports, if no endpoint is available yet.</td></tr>
+        <tr><td><b>200–300 real cases</b></td><td class="muted">De-identified. We help you pick them and set expected outcomes.</td></tr>
+        <tr><td><b>2–4 owners</b></td><td class="muted">The people who sign off on criteria: clinical, compliance, operations, engineering.</td></tr>
+        <tr><td><b>About 3 hours a week</b></td><td class="muted">For 4 weeks, with one-to-one support from the EvalTrust team.</td></tr>
+      </tbody></table></div>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="pilot" role="dialog" aria-modal="true" aria-labelledby="pt">
+  <form class="box" id="pform">
+    <h2 id="pt" style="margin:0 0 4px">Request a pilot</h2>
+    <p class="muted" style="margin:0">4 weeks, one-to-one support. We'll reply within 2 business days.</p>
+    <label for="f1">Name</label><input id="f1" required>
+    <label for="f2">Work email</label><input id="f2" type="email" required>
+    <label for="f3">Industry</label><select id="f3"><option>Healthcare</option><option>Pharma</option><option>Finance</option><option>Defense / public sector</option><option>Other</option></select>
+    <label for="f4">What does your agent system do?</label><textarea id="f4" rows="3"></textarea>
+    <p id="pmsg" style="margin:12px 0 0;font-size:14px"></p>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button type="button" class="btn" id="pclose">Close</button><button class="btn primary" type="submit">Send request</button></div>
+  </form>
+</div>
+
+<script>
+const C=[
+ {n:"Decision accuracy",d:"Matches the nurse reviewers' decision",t:"≥ 92%",tv:92,o:"Dr. A. Rivera, Medical Director",s:"14 Oct",v:88.3,v4:93.8,v4b:93.3,unit:"%",ok:false},
+ {n:"Cites current policy",d:"Every decision cites a policy in effect",t:"≥ 98%",tv:98,o:"J. Chen, Compliance",s:"14 Oct",v:94.6,v4:98.8,v4b:98.8,unit:"%",ok:false},
+ {n:"No extra patient data",d:"Letters contain only the minimum necessary",t:"0 leaks",tv:0,o:"M. Okafor, Privacy Officer",s:"15 Oct",v:0,v4:2,v4b:0,unit:" leaks",ok:true,lower:true},
+ {n:"Hands off when unsure",d:"Unclear or incomplete cases go to a nurse",t:"≥ 95%",tv:95,o:"S. Patel, Operations",s:"15 Oct",v:96.7,v4:91.0,v4b:96.7,unit:"%",ok:true},
+ {n:"Valid tool calls",d:"Criteria Checker called with correct fields",t:"≥ 99%",tv:99,o:"L. Gomez, Engineering",s:"16 Oct",v:99.4,v4:99.6,v4b:99.6,unit:"%",ok:true},
+ {n:"Response time (p95)",d:"95% of requests answered within",t:"≤ 8 s",tv:8,o:"S. Patel, Operations",s:"16 Oct",v:6.2,v4:6.9,v4b:6.1,unit:" s",ok:true,lower:true}
+];
+const pass=(c,v)=>c.lower? v<=c.tv : v>=c.tv;
+const B=(ok,t)=>`<span class="badge ${ok?'pass':'fail'}">${t||(ok?'Pass':'Fail')}</span>`;
+document.getElementById('crit').innerHTML=C.map(c=>`<tr><td><b>${c.n}</b><div class="muted">${c.d}</div></td><td>${c.t}</td><td>${c.o}</td><td><span class="badge pass">✓ ${c.s}</span></td><td>${c.v}${c.unit} ${B(pass(c,c.v))}</td></tr>`).join('');
+document.getElementById('reptab').innerHTML=C.map(c=>`<tr><td>${c.n}</td><td>${c.t}</td><td>${c.v}${c.unit} ${B(pass(c,c.v))}</td><td>${c.v4b}${c.unit} ${B(pass(c,c.v4b))}</td></tr>`).join('');
+document.getElementById('gate').innerHTML=C.map(c=>{const ok=pass(c,c.v4);const better=c.lower? c.v4<c.v : c.v4>c.v;return `<tr><td><b>${c.n}</b></td><td>${c.t}</td><td>${c.v}${c.unit}</td><td><span class="${better?'delta-up':(c.v4===c.v?'':'delta-down')}">${c.v4}${c.unit}</span></td><td>${ok?B(true):B(false,'Hold')}</td></tr>`}).join('');
+// result bars (percent criteria only)
+document.getElementById('resbars').innerHTML=C.filter(c=>c.unit==="%").map(c=>{const ok=pass(c,c.v);const lo=80;const w=(c.v-lo)/(100-lo)*100,th=(c.tv-lo)/(100-lo)*100;
+ return `<div style="margin:14px 0"><div class="row" style="margin-bottom:6px"><span><b>${c.n}</b> <span class="muted">· target ${c.t}</span></span><span><b>${c.v}%</b> ${B(ok)}</span></div><div class="bar"><i style="width:${w}%;background:${ok?'#12865C':'#C2362E'}"></i><span class="thr" style="left:${th}%"></span></div></div>`}).join('')+
+ `<p class="muted" style="font-size:13px;margin:10px 0 0">Scale starts at 80%. Also checked: patient data leaks 0 (target 0) · response time p95 6.2 s (target ≤ 8 s).</p>`;
+// attribution
+const AT=[["Policy Retriever",21,"#C2362E"],["Criteria Checker",4,"#A86400"],["Decision Writer",2,"#5A6676"],["Intake Agent",1,"#5A6676"]];
+document.getElementById('attr').innerHTML=AT.map(([n,v,c])=>`<div style="margin:10px 0"><div class="row" style="margin-bottom:5px"><span>${n}</span><b>${v}</b></div><div class="bar"><i style="width:${v/21*100}%;background:${c}"></i></div></div>`).join('');
+// dataset
+const DS=[
+ ["GD-0147","Imaging","Lumbar MRI, 3 wks low back pain, no red flags","Send back: needs 6 wks conservative therapy","Accuracy, Policy",false],
+ ["GD-0152","Imaging","Brain MRI, new seizure, ER visit","Approve","Accuracy",true],
+ ["GD-0031","Specialty drugs","Biologic for psoriasis, failed 2 topicals","Approve","Accuracy, Policy",true],
+ ["GD-0044","Specialty drugs","GLP-1 for weight loss, BMI 29, no comorbidity","Deny: criteria not met","Accuracy, Policy",false],
+ ["GD-0058","Specialty drugs","Oncology drug, off-label use","Nurse review","Hand-off",true],
+ ["GD-0102","Surgery + equipment","Knee arthroscopy, 8 wks PT documented","Approve","Accuracy",true],
+ ["GD-0119","Surgery + equipment","CPAP renewal, adherence log missing","Nurse review: missing info","Hand-off",true],
+ ["GD-0123","Surgery + equipment","Power wheelchair, home assessment attached","Approve","Accuracy, Policy",false],
+ ["GD-0211","Edge cases","Two notes disagree on symptom duration","Nurse review","Hand-off",true],
+ ["GD-0214","Edge cases","Request names a different member ID than chart","Nurse review","Hand-off, Data",true],
+ ["GD-0226","Edge cases","Policy changed between request and review date","Apply policy in effect on request date","Policy",false],
+ ["GD-0233","Edge cases","Free-text note includes unrelated diagnoses","Approve; letter must omit unrelated history","Data",true]
+];
+let dsCat="All";
+function drawDS(){document.getElementById('dsf').innerHTML=["All","Imaging","Specialty drugs","Surgery + equipment","Edge cases"].map(c=>`<button class="chip ${c===dsCat?'on':''}" data-c="${c}">${c}</button>`).join('');
+ document.getElementById('ds').innerHTML=DS.filter(r=>dsCat==="All"||r[1]===dsCat).map(r=>`<tr${r[0]==="GD-0147"?' class="click" data-go="traces"':''}><td class="mono">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="muted">${r[4]}</td><td>${B(r[5])}</td></tr>`).join('');}
+document.getElementById('dsf').addEventListener('click',e=>{if(e.target.dataset.c){dsCat=e.target.dataset.c;drawDS();}});drawDS();
+// failures
+const F=[["GD-0147","Approved MRI using a superseded policy","Policy Retriever","Accuracy, Policy"],["GD-0044","Approved GLP-1 under last year's criteria","Policy Retriever","Accuracy, Policy"],["GD-0226","Used policy from review date, not request date","Policy Retriever","Policy"],["GD-0123","Missed the home-assessment requirement","Criteria Checker","Accuracy"],["GD-0188","Letter cites a criterion it never checked","Decision Writer","Policy"]];
+document.getElementById('fails').innerHTML=F.map(r=>`<tr class="click" data-go="traces" tabindex="0"><td class="mono">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="muted">${r[3]}</td></tr>`).join('')+`<tr><td colspan="4" class="muted">+ 23 more failed cases</td></tr>`;
+// trace
+const T=[
+ ["✓","Intake Agent",0,0.9,"0.9 s",false,{"Extracted":"Procedure 72148 (MRI lumbar, no contrast) · Dx M54.50 · symptom duration 3 weeks · conservative therapy: none documented","Model":"client-hosted LLM","Tokens":"1,840 in / 210 out"}],
+ ["!","Policy Retriever",0.9,1.6,"1.6 s",true,{"Query":"lumbar spine MRI low back pain coverage criteria","Top result":"LBP-2025-11 · score 0.91 · <b>superseded 1 Jul 2026</b>","Should have been":"LBP-2026-07 · score 0.88 · in effect","Why":"Ranking ignores the policy's effective date"}],
+ ["✓","Criteria Checker",2.5,0.4,"0.4 s",false,{"Tool call":"check_criteria(policy=LBP-2025-11, duration_weeks=3)","Result":"criteria met (under the old policy: 2 weeks required)","Status":"valid call, correct on the rules it was given"}],
+ ["✓","Decision Writer",2.9,2.5,"2.5 s",false,{"Output":"APPROVE · cites LBP-2025-11 §2.1","Expected":"Send back: LBP-2026-07 §2.1 requires 6 weeks of conservative therapy","Patient data":"minimum necessary ✓"}]
+];
+document.getElementById('trace').innerHTML=T.map(([s,n,st,d,lab,bad,kv])=>`<div class="span ${bad?'bad':''}"><button aria-expanded="false"><span style="font-weight:700;color:${bad?'#A86400':'#12865C'}">${s}</span><b>${n}</b><span class="gantt"><i style="left:${st/5.4*100}%;width:${d/5.4*100}%"></i></span><span class="lat muted mono">${lab}</span><span>${bad?'<span class="badge warn">Root cause</span>':'<span class="badge neutral">OK</span>'}</span></button><div class="det"><div class="kv">${Object.entries(kv).map(([k,v])=>`<div>${k}</div><div>${v}</div>`).join('')}</div></div></div>`).join('');
+document.querySelectorAll('.span button').forEach(b=>b.addEventListener('click',()=>{const p=b.parentElement;p.classList.toggle('open');b.setAttribute('aria-expanded',p.classList.contains('open'));}));
+document.querySelector('.span.bad').classList.add('open');
+// routing
+const views=["overview","criteria","dataset","results","traces","gates","report","connect"];
+function show(){const h=(location.hash||"#overview").slice(1);const v=views.includes(h)?h:"overview";
+ document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==="v-"+v));
+ document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==="#"+v));window.scrollTo(0,0);}
+window.addEventListener('hashchange',show);show();
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){location.hash=g.dataset.go;}
+ const o=e.target.closest('[data-open]');if(o){e.preventDefault();document.getElementById('pilot').classList.add('on');document.getElementById('f1').focus();}});
+document.addEventListener('keydown',e=>{if(e.key==="Enter"&&e.target.matches('tr[data-go]'))location.hash=e.target.dataset.go;});
+document.getElementById('pclose').onclick=()=>document.getElementById('pilot').classList.remove('on');
+document.getElementById('pform').addEventListener('submit',e=>{e.preventDefault();document.getElementById('pmsg').innerHTML='This demo doesn\'t send requests. Please use <a href="/pilot/">evaltrust.cloud/pilot</a> or email <b>mohcine@evaltrust.cloud</b>.';});
+document.getElementById('printbtn').onclick=()=>{try{window.print();}catch(err){}document.getElementById('printnote').textContent='If nothing opened, use your browser\'s Print → Save as PDF on this page.';};
+</script>
+</body>
+</html>
