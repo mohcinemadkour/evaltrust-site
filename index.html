@@ -27,6 +27,7 @@
     <nav class="nav-links" aria-label="Main">
       <a href="#how">How it works</a>
       <a href="#proof">Proof</a>
+      <a href="#video">Video</a>
       <a href="#compare">Why independent</a>
       <a href="#offer">Pilot</a>
       <a href="#faq">FAQ</a>
@@ -40,6 +41,7 @@
   <div class="mobile" id="mobile-menu">
     <a href="#how">How it works</a>
     <a href="#proof">Proof</a>
+    <a href="#video">Video</a>
     <a href="#compare">Why independent</a>
     <a href="#offer">Pilot</a>
     <a href="#faq">FAQ</a>
@@ -106,6 +108,31 @@
     <div class="proof-item"><b>4 weeks</b><span>from first call to a signed verdict, with one-to-one support throughout.</span></div>
   </div>
 </div>
+
+<!-- VIDEO -->
+<section class="film" id="video">
+  <div class="wrap film-grid">
+    <div>
+      <h2>See EvalTrust in 90 seconds.</h2>
+      <p class="lead" style="margin-top:20px">Why agents that look perfect in a demo still fail in production, and how signed criteria, real-work testing and full tracing give you a verdict you can defend.</p>
+      <ol class="chapters" aria-label="Video chapters">
+        <li><button type="button" data-t="0"><span>0:00</span>The problem with demo scores</button></li>
+        <li><button type="button" data-t="34.8"><span>0:35</span>Agree on the rules first</button></li>
+        <li><button type="button" data-t="45.8"><span>0:46</span>Test on your real work</button></li>
+        <li><button type="button" data-t="54.3"><span>0:54</span>Trace every step</button></li>
+        <li><button type="button" data-t="64.3"><span>1:04</span>Hold bad releases</button></li>
+        <li><button type="button" data-t="73.3"><span>1:13</span>Audit-ready proof</button></li>
+      </ol>
+    </div>
+    <div class="film-frame">
+      <video id="intro-video" controls playsinline preload="none" poster="/assets/evaltrust-intro-poster.jpg" aria-label="EvalTrust introduction video, 90 seconds">
+        <source src="/assets/evaltrust-intro.mp4" type="video/mp4">
+        <track kind="captions" src="/assets/evaltrust-intro.en.vtt" srclang="en" label="English">
+        Your browser can't play this video. <a href="/assets/evaltrust-intro.mp4">Download it</a> instead.
+      </video>
+    </div>
+  </div>
+</section>
 
 <!-- PROBLEM -->
 <section id="proof">
@@ -405,6 +432,22 @@
   function toggle(){var o=ev.classList.toggle('open');key.setAttribute('aria-expanded',String(o));}
   key.addEventListener('click',toggle);
   key.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+
+  // video chapters
+  var vid=document.getElementById('intro-video');
+  document.querySelectorAll('.chapters button').forEach(function(b){
+    b.addEventListener('click',function(){
+      vid.preload='auto';
+      var t=parseFloat(b.dataset.t);
+      var go=function(){vid.currentTime=t;vid.play();};
+      if(vid.readyState>=1){go();}else{vid.addEventListener('loadedmetadata',go,{once:true});vid.load();}
+    });
+  });
+  vid.addEventListener('timeupdate',function(){
+    var bs=[].slice.call(document.querySelectorAll('.chapters button')),cur=null;
+    bs.forEach(function(b){if(vid.currentTime>=parseFloat(b.dataset.t)-.2)cur=b;});
+    bs.forEach(function(b){b.classList.toggle('on',b===cur);});
+  });
 
   // form -> Formspree
   var FORM_ENDPOINT="https://formspree.io/f/xdeevnjl";

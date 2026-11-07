@@ -1,0 +1,34 @@
+WEBVTT
+
+00:00:00.300 --> 00:00:10.700
+Your team is putting AI agents into production. In the demo, the agent gets it right every time. Then real customers show up, and it starts getting things wrong, quietly.
+
+00:00:11.300 --> 00:00:17.700
+When it fails, which agent broke? The planner, the search, the tool call? Nobody can tell.
+
+00:00:18.300 --> 00:00:25.200
+And when the auditor asks how it was tested, there's nothing to hand over. Compliance is not happy.
+
+00:00:25.800 --> 00:00:34.200
+EvalTrust fixes all three, with independent testing and monitoring for your AI agents, before and after they ship. Here's how.
+
+00:00:34.800 --> 00:00:45.200
+It agrees on what good means first. Your team signs off on the rules (how accurate it must be, what's off limits) before any test runs. So no one moves the goalposts later.
+
+00:00:45.800 --> 00:00:53.700
+It tests on your real work. Real cases from your business, scored blind, so the number is honest. Not a demo score.
+
+00:00:54.300 --> 00:01:03.700
+It watches every step. In production, every agent's work is traced. When an answer goes wrong, you see exactly which step broke, and why.
+
+00:01:04.300 --> 00:01:12.700
+Before a new model or prompt goes live, it runs every check again and holds any change that would make answers worse.
+
+00:01:13.300 --> 00:01:22.700
+And you have the proof. One audit-ready report: what was tested, what passed, who signed off. Your data never leaves your cloud.
+
+00:01:23.300 --> 00:01:28.200
+Honest tests. Clear view. Safe releases. Real proof.
+
+00:01:28.800 --> 00:01:35.700
+Join the EvalTrust pilot: 4 weeks with one-to-one support. Start at app.evaltrust.cloud.
