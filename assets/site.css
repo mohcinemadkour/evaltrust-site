@@ -276,3 +276,11 @@ footer{background:var(--ink);color:#AFC0D3;border-top:1px solid var(--rule-dark)
 .chapters button:focus-visible{outline:3px solid var(--green);outline-offset:-3px}
 @media (max-width:900px){.film{padding:72px 0}.film-grid{grid-template-columns:minmax(0,1fr);gap:32px}.film-grid .film-frame{order:-1}}
 section[id]{scroll-margin-top:68px}
+
+/* wide video layout (case study walkthrough) */
+.film-wide .wrap-wide{max-width:1440px;margin:0 auto;padding:0 28px}
+.film-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end;margin-bottom:36px}
+.film-head .lead{margin:0}
+.film-wide .chapters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:28px;margin-top:24px}
+@media (max-width:900px){.film-head{grid-template-columns:minmax(0,1fr);gap:16px}.film-wide .chapters{grid-template-columns:minmax(0,1fr)}.film-wide .wrap-wide{padding:0 20px}}
+.film-wide .film-frame{max-width:min(100%,calc((100vh - 110px)*16/9));margin:0 auto}
