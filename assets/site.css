@@ -213,6 +213,8 @@ footer{background:var(--ink);color:#AFC0D3;border-top:1px solid var(--rule-dark)
 .foot nav{display:flex;flex-wrap:wrap;gap:20px}
 .foot a{color:#C4CDD8;text-decoration:none}
 .foot a:hover{color:var(--white)}
+.programs{display:flex;align-items:center;gap:14px;margin-top:24px;padding-top:22px;border-top:1px solid var(--rule-dark);font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.programs img{display:block;height:60px;width:auto;border-radius:4px}
 
 /* responsive */
 @media (max-width:1060px){
